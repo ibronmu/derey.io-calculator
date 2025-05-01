@@ -3,178 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Calculator</title>
+    <title>Scientific Calculator</title>
     <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --text: #333;
+            --text-light: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text);
         }
 
         .calculator-container {
-            width: 400px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .calculator-container:hover {
+            transform: translateY(-5px);
         }
 
         h1 {
             text-align: center;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.8rem;
         }
 
-        .calculator {
+        .display {
+            background-color: var(--light);
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            text-align: right;
+            font-size: 1.8rem;
+            font-weight: 500;
+            min-height: 80px;
+            word-wrap: break-word;
+            border: 1px solid #ddd;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .calculator-grid {
             display: grid;
-            gap: 15px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
         }
 
-        input, select, button {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        input:focus, select:focus, button:focus {
-            outline: 2px solid #007bff;
-        }
-
-        .calc-btn {
-            background-color: #007bff;
-            color: white;
+        button {
+            padding: 1rem;
+            font-size: 1.2rem;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            background-color: var(--light);
+            color: var(--dark);
         }
 
-        .calc-btn:hover {
-            background-color: #0056b3;
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        .reset-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            cursor: pointer;
+        button:active {
+            transform: translateY(0);
         }
 
-        .reset-btn:hover {
-            background-color: #a71d2a;
+        .operator {
+            background-color: var(--accent);
+            color: var(--text-light);
         }
 
-        .result {
-            background-color: #f8f9fa;
-            text-align: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-weight: 700;
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        .equals {
+            background-color: var(--success);
+            color: var(--text-light);
+            grid-column: span 2;
+        }
+
+        .clear {
+            background-color: var(--danger);
+            color: var(--text-light);
+        }
+
+        .function {
+            background-color: var(--secondary);
+            color: var(--text-light);
+        }
+
+        .history-btn {
+            background-color: var(--primary);
+            color: var(--text-light);
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .history-panel {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--light);
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .history-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ddd;
         }
 
         .error {
-            color: red;
+            color: var(--danger);
             font-size: 0.9rem;
             text-align: center;
+            margin-top: 0.5rem;
+            min-height: 1.2rem;
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 1.5rem;
+                border-radius: 0;
+                max-width: 100%;
+                min-height: 100vh;
+            }
+            
+            button {
+                padding: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="calculator-container">
-        <h1>Calculator</h1>
-        <div class="calculator">
-            <input type="number" id="num1" placeholder="Enter first number" aria-label="First number">
-            <select name="operator" id="operator" aria-label="Operator">
-                <option value="">Choose an operator</option>
-                <option value="addition">Addition (+)</option>
-                <option value="subtraction">Subtraction (-)</option>
-                <option value="multiplication">Multiplication (*)</option>
-                <option value="division">Division (/)</option>
-            </select>
-            <input type="number" id="num2" placeholder="Enter second number" aria-label="Second number">
-            <button class="calc-btn" id="calc-btn">Calculate</button>
-            <button class="reset-btn" id="reset-btn">Reset</button>
-            <div class="error" id="error-msg"></div>
-            <div class="result" id="result">Result: --</div>
+        <h1>Scientific Calculator</h1>
+        <div class="display" id="display">0</div>
+        <div class="error" id="error"></div>
+        
+        <div class="calculator-grid">
+            <button class="clear" onclick="clearDisplay()">AC</button>
+            <button class="function" onclick="appendToDisplay('(')">(</button>
+            <button class="function" onclick="appendToDisplay(')')">)</button>
+            <button class="operator" onclick="appendToDisplay('/')">/</button>
+            
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button class="operator" onclick="appendToDisplay('*')">×</button>
+            
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
+            
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
+            
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button class="function" onclick="backspace()">⌫</button>
+            <button class="equals" onclick="calculate()">=</button>
+            
+            <button class="function" onclick="appendToDisplay('Math.sqrt(')">√</button>
+            <button class="function" onclick="appendToDisplay('Math.pow(')">x^y</button>
+            <button class="function" onclick="appendToDisplay('Math.sin(')">sin</button>
+            <button class="function" onclick="appendToDisplay('Math.cos(')">cos</button>
+        </div>
+        
+        <button class="history-btn" onclick="toggleHistory()">Show History</button>
+        <div class="history-panel" id="history-panel">
+            <div id="history-items"></div>
         </div>
     </div>
 
     <script>
-        const num1 = document.getElementById('num1');
-        const num2 = document.getElementById('num2');
-        const operator = document.getElementById('operator');
-        const calcBtn = document.getElementById('calc-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const result = document.getElementById("result");
-        const errorMsg = document.getElementById("error-msg");
+        let currentInput = '0';
+        let calculationHistory = [];
+        const display = document.getElementById('display');
+        const errorElement = document.getElementById('error');
+        const historyPanel = document.getElementById('history-panel');
+        const historyItems = document.getElementById('history-items');
 
-        // Reset inputs and result
-        resetBtn.addEventListener('click', () => {
-            num1.value = '';
-            num2.value = '';
-            operator.value = '';
-            result.innerText = 'Result: --';
-            errorMsg.innerText = '';
-        });
+        function updateDisplay() {
+            display.textContent = currentInput;
+        }
 
-        // Perform calculation
-        calcBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            calculate();
-        });
-
-        // Calculation logic
-        const calculate = () => {
-            // Clear previous errors
-            errorMsg.innerText = '';
-
-            const val1 = Number(num1.value);
-            const val2 = Number(num2.value);
-            const op = operator.value;
-
-            if (!num1.value || !num2.value || !op) {
-                errorMsg.innerText = 'Please fill in all fields and select an operator.';
-                return;
+        function appendToDisplay(value) {
+            errorElement.textContent = '';
+            
+            if (currentInput === '0' && value !== '.') {
+                currentInput = value;
+            } else {
+                currentInput += value;
             }
+            
+            updateDisplay();
+        }
 
-            if (op === 'division' && val2 === 0) {
-                errorMsg.innerText = 'Division by zero is not allowed!';
-                return;
+        function clearDisplay() {
+            currentInput = '0';
+            errorElement.textContent = '';
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (currentInput.length === 1) {
+                currentInput = '0';
+            } else {
+                currentInput = currentInput.slice(0, -1);
             }
+            updateDisplay();
+        }
 
-            let calcResult;
-            switch (op) {
-                case 'addition':
-                    calcResult = val1 + val2;
-                    break;
-                case 'subtraction':
-                    calcResult = val1 - val2;
-                    break;
-                case 'multiplication':
-                    calcResult = val1 * val2;
-                    break;
-                case 'division':
-                    calcResult = val1 / val2;
-                    break;
-                default:
-                    errorMsg.innerText = 'Invalid operator selected!';
-                    return;
-            }
-
-            result.innerText = `Result: ${calcResult}`;
-        };
-
-        // Allow pressing "Enter" to calculate
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                calculate();
-            }
-        });
-    </script>
-</body>
-</html>
+        function calculate() {
+            try {
+                // Replace visual operators with JavaScript operators
+                let expression = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
+                
+                // Evaluate the expression
+                const result = eval(expression);
+                
+                // Add to history
+                calculationHistory.push(`${currentInput} = ${result}`);
+                updateHistory();
+                
+                // Display
